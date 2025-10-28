@@ -3,43 +3,41 @@
 # 🎓 PAP - [Título do Projeto]
 
 ## 👤 Informação do Aluno
-**Nome:** [Teu Nome Completo]  
-**Número:** [Número de Aluno]  
+**Nome:** [Luis Ramiro Medina Vieyra]  
+**Número:** [11]  
 **Curso:** Profissional de Informática - Sistemas
 **Ano Letivo:** 2025/2026 
-**Orientador:** [Nome do Professor Orientador]
+**Orientador:** [Patrícia Carvalhais]
 
 ## 📋 Descrição do Projeto
 [Descreve brevemente o teu projeto em 2-3 frases. Exemplo:]  
 Sistema de gestão de biblioteca online que permite aos utilizadores pesquisar livros, fazer reservas e gerir o seu perfil de leitor.
 
 ## 🎯 Objetivos Principais
-- [ ] Desenvolver um site dinâmico com base de dados
-- [ ] Implementar sistema de autenticação de utilizadores
-- [ ] Criar interface responsiva e intuitiva
-- [ ] Implementar funcionalidade CRUD completa
+- [x] Desenvolver um site dinâmico com base de dados
+- [x] Implementar sistema de autenticação de utilizadores
+- [x] Criar interface responsiva e intuitiva
+- [x] Implementar funcionalidade CRUD completa
 - [ ] Fazer deploy da aplicação
 
 ## 🛠️ Stack Tecnológica
 
 ### **Frontend**
-- [ ] HTML5, CSS3, JavaScript
+- [x] HTML5, CSS3, JavaScript
 - [ ] Bootstrap/Tailwind CSS [ou outro framework]
 - [ ] React/Vue.js [opcional]
 
 ### **Backend**
-- [ ] Node.js/PHP/Python [escolher um]
-- [ ] Express/Laravel/Django [framework]
-- [ ] Autenticação JWT/Sessions
+- [x] PHP
+- [x] Autenticação de Sessions
 
 ### **Base de Dados**
-- [ ] MySQL/PostgreSQL
-- [ ] ORM: Sequelize/Eloquent [conforme backend]
-
+- [x] MySQL
+      
 ### **Outras Ferramentas**
-- [ ] Git & GitHub
-- [ ] Docker [opcional]
-- [ ] VSCode
+- [x] Git & GitHub
+- [x] Xampp
+- [x] VSCode
 
 ## 📁 Estrutura do Projeto
 ![Estrutura do projeto](./docs/images/estrutura.png)
@@ -87,7 +85,7 @@ O que foi feito desde a última atualização:
 - Protótipo - Design no Figma
 
 ## 📞 Contacto
-- Email: [teu.email@escola.com]
-- GitHub: [@teuusername]
+- Email: [a142072agrcanelas.com]
+- GitHub: [a14207]
 
 
