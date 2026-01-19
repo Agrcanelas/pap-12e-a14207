@@ -1,337 +1,220 @@
 <?php
-session_start();
+require_once 'config.php';
 
-$lang = $_GET['lang'] ?? 'es';
-
-// --- AVISO IMPORTANTE: ESTOS DATOS DEBEN SER IGUALES QUE EN INDEX.PHP Y DETALLE.PHP ---
-// Idealmente, deberías mover esto a un archivo separado (ej. 'datos.inc.php') y usar 'require_once'.
-$productos_temp = [
-    // Usamos IDs de ejemplo que coinciden con los del index/detalle si es necesario
-    1 => ['nombre' => 'MacBook Air M3 13"', 'imagen' => 'macbook-air-m3-13in-midnight-config-202402', 'precio' => 999],
-    2 => ['nombre' => 'iPhone 15 Pro', 'imagen' => 'iphone-15-pro-black-titanium-select-202309-ecommerce', 'precio' => 999],
-    // Añade el resto de tus productos aquí para que la página funcione
-];
-$productos = $productos_temp; // Usamos esto por simplicidad
-
-// Traducciones e info de idiomas
-$idiomas = [
-    'es' => [
-      'nombre' => 'ES', 
-      'bandera' => '🇪🇸', 
-      'moneda_simbolo' => '€', 
-      'traducciones' => [
-        'titulo' => 'Aura Store', 'iniciar_sesion' => 'Iniciar sesión', 'registrarse' => 'Registrarse', 'carrito' => 'Carrito',
-        'categorias' => ['Todas', 'Mac', 'iPhone', 'Apple Watch', 'Accesorios', 'iPad'], 'buscar' => 'Buscar productos...',
-        'ordenar_por' => 'Ordenar por', 'precio_menor' => 'Precio: menor a mayor', 'precio_mayor' => 'Precio: mayor a menor',
-        'novedad_titulo' => 'iPhone 15 Pro (Titanio)', 'novedad_sub' => 'Descubre el poder de lo imposible. Chip A17 Pro y cámara de 48MP.',
-        'mas_info' => 'Más información >', 'comprar' => 'Comprar >', 'todos_productos' => 'Todos los Productos',
-      ]
-    ],
-    'en' => [
-      'nombre' => 'EN', 
-      'bandera' => '🇬🇧', 
-      'moneda_simbolo' => '£', 
-      'traducciones' => [
-        'titulo' => 'Aura Store', 'iniciar_sesion' => 'Sign In', 'registrarse' => 'Sign Up', 'carrito' => 'Cart',
-        'categorias' => ['All', 'Mac', 'iPhone', 'Apple Watch', 'Accessories', 'iPad'], 'buscar' => 'Search products...',
-        'ordenar_por' => 'Sort by', 'precio_menor' => 'Price: low to high', 'precio_mayor' => 'Price: high to low',
-        'novedad_titulo' => 'iPhone 15 Pro (Titanium)', 'novedad_sub' => 'Discover the power of impossible. A17 Pro chip and 48MP camera.',
-        'mas_info' => 'Learn more >', 'comprar' => 'Buy >', 'todos_productos' => 'All Products',
-      ]
-    ],
-    'fr' => [
-      'nombre' => 'FR', 
-      'bandera' => '🇫🇷', 
-      'moneda_simbolo' => '€', 
-      'traducciones' => [
-        'titulo' => 'Aura Store', 'iniciar_sesion' => 'Connexion', 'registrarse' => 'Inscription', 'carrito' => 'Panier',
-        'categorias' => ['Tous', 'Mac', 'iPhone', 'Apple Watch', 'Accessoires', 'iPad'], 'buscar' => 'Rechercher des produits...',
-        'ordenar_por' => 'Trier par', 'precio_menor' => 'Prix : croissant', 'precio_mayor' => 'Prix : décroissant',
-        'novedad_titulo' => 'iPhone 15 Pro (Titane)', 'novedad_sub' => 'Découvrez le pouvoir de l\'impossible. Puce A17 Pro et appareil photo 48MP.',
-        'mas_info' => 'En savoir plus >', 'comprar' => 'Acheter >', 'todos_productos' => 'Tous les produits',
-      ]
-    ],
-    'pt' => [
-      'nombre' => 'PT', 
-      'bandera' => '🇵🇹', 
-      'moneda_simbolo' => '€', 
-      'traducoes' => [ // Nota: algunas palabras cambian en portugués
-        'titulo' => 'Aura Store', 'iniciar_sesion' => 'Iniciar Sessão', 'registrarse' => 'Registar', 'carrito' => 'Carrinho',
-        'categorias' => ['Todos', 'Mac', 'iPhone', 'Apple Watch', 'Acessórios', 'iPad'], 'buscar' => 'Procurar produtos...',
-        'ordenar_por' => 'Ordenar por', 'precio_menor' => 'Preço: menor para maior', 'precio_mayor' => 'Preço: maior para menor',
-        'novedad_titulo' => 'iPhone 15 Pro (Titânio)', 'novedad_sub' => 'Descubra o poder do impossível. Chip A17 Pro e câmera de 48MP.',
-        'mas_info' => 'Mais informações >', 'comprar' => 'Comprar >', 'todos_productos' => 'Todos os Produtos',
-      ]
-    ],
-    'us' => [
-      'nombre' => 'US', 
-      'bandera' => '🇺🇸', 
-      'moneda_simbolo' => '$', 
-      'traducciones' => [
-        'titulo' => 'Aura Store', 'iniciar_sesion' => 'Sign In', 'registrarse' => 'Sign Up', 'carrito' => 'Cart',
-        'categorias' => ['All', 'Mac', 'iPhone', 'Apple Watch', 'Accessories', 'iPad'], 'buscar' => 'Search products...',
-        'ordenar_por' => 'Sort by', 'precio_menor' => 'Price: low to high', 'precio_mayor' => 'Price: high to low',
-        'novedad_titulo' => 'iPhone 15 Pro (Titanium)', 'novedad_sub' => 'Discover the power of impossible. A17 Pro chip and 48MP camera.',
-        'mas_info' => 'Learn more >', 'comprar' => 'Buy >', 'todos_productos' => 'All Products',
-      ]
-    ],
-  ];
-  
-
-if (!isset($idiomas[$lang])) $lang = 'es';
-$t = $idiomas[$lang]['traducciones'] ?? $idiomas[$lang]['traducoes'] ?? $idiomas[$lang]['traductions'];
-$moneda = $idiomas[$lang]['moneda_simbolo'];
-
-
-if (!isset($_SESSION['carrito'])) {
-    $_SESSION['carrito'] = [];
-}
-
-$carrito = [];
-foreach ($_SESSION['carrito'] as $item) {
-    if (isset($item['id'])) {
-        $carrito[$item['id']] = $item;
+if (!function_exists('formatear_precio')) {
+    function formatear_precio($cantidad) {
+        return number_format($cantidad, 2, ',', '.') . ' €';
     }
 }
 
-$mensaje = '';
+$items_detallados = [];
+$subtotal_carrito = 0;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['actualizar_cantidades'])) {
-        if (isset($_POST['cantidades']) && is_array($_POST['cantidades'])) {
-            foreach ($_POST['cantidades'] as $id => $cantidad) {
-                $id = intval($id);
-                $cantidad = max(0, intval($cantidad));
-
-                if (isset($carrito[$id])) {
-                    if ($cantidad === 0) {
-                        unset($carrito[$id]);
-                    } else {
-                        $carrito[$id]['cantidad'] = $cantidad;
-                    }
-                }
-            }
-            $_SESSION['carrito'] = array_values($carrito);
-            $mensaje = $t['msg_actualizado'];
-        }
-    } elseif (isset($_POST['eliminar'])) {
-        $idEliminar = intval($_POST['eliminar']);
-        if (isset($carrito[$idEliminar])) {
-            unset($carrito[$idEliminar]);
-            $_SESSION['carrito'] = array_values($carrito);
-            $mensaje = $t['msg_eliminado'];
-        }
-    } elseif (isset($_POST['pagar'])) {
-        $nombre = trim($_POST['nombre'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $direccion = trim($_POST['direccion'] ?? '');
-        $metodo_pago = $_POST['metodo_pago'] ?? '';
-
-        if ($nombre === '' || $email === '' || $direccion === '' || $metodo_pago === '' || empty($carrito)) {
-            $mensaje = $t['msg_error_pago'];
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $mensaje = $t['msg_email_invalido'];
-        } else {
-            // Simulación de pago
-            $_SESSION['carrito'] = [];
-            $mensaje = sprintf($t['msg_gracias'], htmlspecialchars($nombre));
-        }
+// Eliminar un item
+if (isset($_GET['eliminar'])) {
+    $key_a_eliminar = $_GET['eliminar'];
+    if (isset($_SESSION['carrito'][$key_a_eliminar])) {
+        unset($_SESSION['carrito'][$key_a_eliminar]);
     }
-    header('Location: carrito.php?lang=' . urlencode($lang) . '&mensaje=' . urlencode($mensaje));
+    header("Location: carrito.php");
     exit;
 }
 
-if (isset($_GET['mensaje'])) {
-    $mensaje = urldecode($_GET['mensaje']);
+// Vaciar carrito
+if (isset($_GET['vaciar'])) {
+    unset($_SESSION['carrito']);
+    unset($_SESSION['descuento']); // También vaciamos el descuento
+    header("Location: carrito.php");
+    exit;
 }
 
-$subtotal = 0;
-foreach ($carrito as $item) {
-    if (isset($productos[$item['id']])) {
-        $subtotal += $productos[$item['id']]['precio'] * $item['cantidad'];
+// Quitar cupón manualmente
+if (isset($_GET['quitar_cupon'])) {
+    unset($_SESSION['descuento']);
+    header("Location: carrito.php");
+    exit;
+}
+
+if (!empty($_SESSION['carrito'])) {
+    foreach ($_SESSION['carrito'] as $key => $datos) {
+        $id = $datos['id'];
+        $stmt = $pdo->prepare("SELECT * FROM productos WHERE id = ?");
+        $stmt->execute([$id]);
+        $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($producto) {
+            $fila_subtotal = $producto['precio'] * $datos['cantidad'];
+            $subtotal_carrito += $fila_subtotal;
+            $items_detallados[] = [
+                'key' => $key, 
+                'nombre' => $producto['nombre'],
+                'precio' => $producto['precio'],
+                'imagen' => $producto['imagen'],
+                'color' => $datos['color'],
+                'cantidad' => $datos['cantidad'],
+                'subtotal' => $fila_subtotal
+            ];
+        }
     }
 }
 
-$costoEnvio = $subtotal > 0 && $subtotal < 500 ? 20.00 : 0.00;
-$impuestos = $subtotal * 0.21;
-$totalFinal = $subtotal + $costoEnvio + $impuestos;
-$cantidadCarrito = isset($_SESSION['carrito']) ? array_sum(array_column($_SESSION['carrito'], 'cantidad')) : 0;
+// Lógica de Descuento
+$porcentaje_descuento = $_SESSION['descuento'] ?? 0;
+$monto_descuento = $subtotal_carrito * ($porcentaje_descuento / 100);
+$total_final = $subtotal_carrito - $monto_descuento;
 ?>
 
 <!DOCTYPE html>
-<html lang="<?php echo htmlspecialchars($lang); ?>">
+<html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title><?php echo htmlspecialchars($t['titulo_carrito']); ?> - Aura Store</title>
-<link href="fonts.googleapis.com" rel="stylesheet">
-<style>
-    /* ... Tus estilos CSS aquí (son los mismos que me enviaste) ... */
-     :root {
-        --color-primary: #0071e3; --color-background: #ffffff; --color-card: #f9f9f9;
-        --color-text: #1d1d1f; --color-text-secondary: #86868b; --color-border: #d2d2d7;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background-color: var(--color-background); color: var(--color-text); padding-top: 48px; }
-    header { position: fixed; top: 0; width: 100%; background: rgba(255, 255, 255, 0.95); border-bottom: 1px solid var(--color-border); height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; backdrop-filter: blur(10px); z-index: 1000; }
-    .logo a { font-weight: 700; font-size: 1rem; color: var(--color-text); text-decoration: none; }
-    .nav-items { display: flex; align-items: center; gap: 20px; }
-    .nav-items a { color: var(--color-text); font-size: 0.8rem; text-decoration: none; opacity: 0.8; }
-    .main-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
-    h1 { text-align: center; margin-bottom: 40px; font-size: 2rem; font-weight: 600; color: var(--color-text); }
-    .mensaje { background-color: var(--color-card); border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; color: var(--color-text); border: 1px solid var(--color-border); }
-    .carrito-wrapper { display: flex; gap: 30px; }
-    .productos-carrito { flex: 2; }
-    .resumen-carrito { flex: 1; position: sticky; top: 68px; height: fit-content; background: var(--color-card); border: 1px solid var(--color-border); border-radius: 15px; padding: 20px; }
-    .tabla-carrito { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    .tabla-carrito thead th { text-align: left; color: var(--color-text-secondary); font-weight: 400; font-size: 0.9rem; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
-    .fila-producto { border-bottom: 1px solid var(--color-border); }
-    .fila-producto td { padding: 20px 0; vertical-align: middle; }
-    .producto-info { display: flex; align-items: center; gap: 15px; }
-    .producto-info img { width: 80px; height: 80px; object-fit: contain; mix-blend-mode: darken; border-radius: 8px; border: 1px solid var(--color-border); background: white; }
-    .producto-nombre { font-weight: 600; }
-    .producto-precio-unidad, .producto-precio-total { font-weight: 600; color: var(--color-text-secondary); }
-    .producto-precio-total { color: var(--color-text); }
-    input[type="number"] { width: 60px; padding: 8px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-background); color: var(--color-text); text-align: center; font-size: 1rem; appearance: none; margin: 0; }
-    input[type="number"]:focus { outline: none; border-color: var(--color-primary); }
-    .btn-eliminar { background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 1.2rem; transition: color 0.3s; }
-    .btn-eliminar:hover { color: #ff3b3b; }
-    .botones-carrito { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-    .btn-continuar-compra, .btn-actualizar { background: var(--color-background); color: var(--color-text); padding: 10px 20px; border: 1px solid var(--color-border); border-radius: 12px; cursor: pointer; transition: background-color 0.3s; font-weight: 600; }
-    .btn-actualizar { background-color: var(--color-primary); color: white; border-color: var(--color-primary); }
-    .resumen-carrito h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 20px; }
-    .resumen-linea { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--color-text-secondary); font-size: 0.9rem; }
-    .resumen-total { display: flex; justify-content: space-between; font-size: 1.4rem; font-weight: 700; margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--color-border); }
-    .form-pago input, .form-pago select, .form-pago textarea { width: 100%; padding: 10px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-background); color: var(--color-text); margin-bottom: 15px; font-size: 1rem; }
-    .form-pago input:focus, .form-pago select:focus, .form-pago textarea:focus { outline: none; border-color: var(--color-primary); }
-    .form-pago button { width: 100%; padding: 12px; border: none; border-radius: 8px; background-color: var(--color-primary); color: white; font-size: 1rem; font-weight: 600; cursor: pointer; }
-    @media (max-width: 900px) { .carrito-wrapper { flex-direction: column; } .resumen-carrito { position: static; } }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu Bolsa - Aura Stock</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f5f5f7; --text: #1d1d1f; --accent: #000; --blue: #007aff; --gray: #86868b; --red: #ff3b30; }
+        body { font-family: 'Inter', sans-serif; background-color: #fff; margin: 0; padding-top: 100px; color: var(--text); -webkit-font-smoothing: antialiased; }
+
+        header {
+            position: fixed; top: 0; width: 100%; height: 65px;
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px);
+            display: flex; justify-content: space-around; align-items: center;
+            z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .cart-container { max-width: 840px; margin: 0 auto; padding: 20px; animation: fadeIn 0.8s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .cart-header { border-bottom: 1px solid #d2d2d7; padding-bottom: 20px; margin-bottom: 10px; }
+        h1 { font-size: 40px; font-weight: 600; margin: 0; letter-spacing: -1.5px; }
+        
+        .cart-item {
+            display: grid; grid-template-columns: 140px 1fr 120px; gap: 30px;
+            padding: 40px 0; border-bottom: 1px solid #e2e2e7; align-items: start;
+        }
+        .item-img img { width: 140px; height: 140px; object-fit: contain; background: var(--bg); border-radius: 18px; }
+        
+        .item-info h2 { font-size: 22px; margin: 0 0 8px; font-weight: 600; }
+        .item-info p { color: var(--gray); margin: 4px 0; font-size: 15px; }
+        
+        .btn-eliminar { color: var(--blue); text-decoration: none; font-size: 14px; font-weight: 500; display: inline-block; margin-top: 15px; }
+
+        .item-price { text-align: right; font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
+
+        .summary-box { background: var(--bg); border-radius: 24px; padding: 35px; margin-top: 40px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 16px; }
+        .total-row { font-size: 26px; font-weight: 600; border-top: 1px solid #d2d2d7; padding-top: 20px; margin-top: 10px; }
+        
+        /* CUPONES ESTILO APPLE */
+        .coupon-section { background: #fff; padding: 20px; border-radius: 18px; margin-bottom: 25px; border: 1px solid #d2d2d7; }
+        .coupon-form { display: flex; gap: 10px; margin-top: 10px; }
+        .coupon-form input { flex-grow: 1; padding: 12px; border-radius: 10px; border: 1px solid #d2d2d7; font-size: 14px; outline: none; }
+        .coupon-form button { background: var(--accent); color: #fff; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .coupon-active { display: flex; justify-content: space-between; align-items: center; color: #34c759; font-weight: 600; font-size: 14px; }
+
+        .btn-checkout {
+            background: var(--accent); color: white; padding: 20px;
+            border-radius: 14px; border: none; font-weight: 600; font-size: 17px;
+            cursor: pointer; text-decoration: none; display: block; text-align: center;
+            margin-top: 30px; transition: all 0.3s;
+        }
+        .btn-checkout:hover { background: #1d1d1f; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        
+        .empty-cart { text-align: center; padding: 120px 20px; }
+        .btn-vaciar { color: var(--gray); text-decoration: none; font-size: 13px; transition: color 0.2s; }
+        .btn-vaciar:hover { color: var(--red); }
+    </style>
 </head>
 <body>
 
-    <!-- INICIO HEADER DINÁMICO INTEGRADO -->
-    <header>
-      <div class="logo">
-        <a href="index.php?lang=<?php echo htmlspecialchars($lang ?? 'es'); ?>"> Aura Store</a>
-      </div>
-      <div class="nav-items">
-        <?php if (isset($_SESSION['usuario_nombre'])): ?>
-          <a href="usuario.php?lang=<?php echo htmlspecialchars($lang ?? 'es'); ?>">Hola, <?php echo htmlspecialchars($_SESSION['usuario_nombre']); ?></a>
-          <a href="usuario.php?logout=true&lang=<?php echo htmlspecialchars($lang ?? 'es'); ?>">Cerrar Sesión</a>
-          <a href="carrito.php?lang=<?php echo htmlspecialchars($lang ?? 'es'); ?>"><?php echo htmlspecialchars($t['carrito'] ?? 'Carrito'); ?> (<?php echo htmlspecialchars($cantidadCarrito ?? 0); ?>)</a>
-        <?php else: ?>
-          <a href="login.php?lang=<?php echo htmlspecialchars($lang ?? 'es'); ?>"><?php echo htmlspecialchars($t['iniciar_sesion'] ?? 'Iniciar sesión'); ?></a>
-          <a href="registro.php?lang=<?php echo htmlspecialchars($lang ?? 'es'); ?>"><?php echo htmlspecialchars($t['registrarse'] ?? 'Registrarse'); ?></a>
-          <a href="carrito.php?lang=<?php echo htmlspecialchars($lang ?? 'es'); ?>"><?php echo htmlspecialchars($t['carrito'] ?? 'Carrito'); ?> (<?php echo htmlspecialchars($cantidadCarrito ?? 0); ?>)</a>
-        <?php endif; ?>
+<header>
+    <a href="index.php" style="text-decoration: none; color: #000; font-weight: 600; font-size: 19px;"> Aura Stock</a>
+    <nav><a href="index.php" style="text-decoration: none; color: var(--blue); font-size: 14px; font-weight: 500;">Seguir comprando</a></nav>
+</header>
+
+<div class="cart-container">
+    <?php if (empty($items_detallados)): ?>
+        <div class="empty-cart">
+            <h1>Tu bolsa está vacía.</h1>
+            <p style="color: var(--gray); margin: 20px 0 40px; font-size: 18px;">Encuentra algo que te guste y añádelo aquí.</p>
+            <a href="index.php" class="btn-checkout" style="display: inline-block; padding: 15px 40px;">Ver productos</a>
+        </div>
+    <?php else: ?>
+        <div class="cart-header">
+            <h1>Tu bolsa.</h1>
+            <p style="color: var(--gray); margin-top: 10px;">El envío es gratuito en todos los pedidos.</p>
+        </div>
         
-        <!-- El selector de idioma aquí es complicado porque no sabe en qué página está, lo dejamos simple -->
-         <select onchange="window.location.href='?lang='+this.value">
-            <?php foreach ($idiomas as $codigo => $datos): ?>
-                <option value="<?php echo htmlspecialchars($codigo); ?>" <?php echo ($lang ?? 'es') === $codigo ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($datos['bandera']) . ' ' . htmlspecialchars($datos['nombre']); ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-      </div>
-    </header>
-    <!-- FIN HEADER DINÁMICO -->
-
-    <div class="main-container">
-        <h1><?php echo htmlspecialchars($t['titulo_carrito']); ?></h1>
-
-        <?php if (!empty($mensaje)): ?>
-            <div class="mensaje"><?php echo htmlspecialchars($mensaje); ?></div>
-        <?php endif; ?>
-
-        <?php if (empty($carrito)): ?>
-            <p style="text-align: center; font-size: 1.2rem;"><?php echo htmlspecialchars($t['carrito_vacio']); ?></p>
-        <?php else: ?>
-            <div class="carrito-wrapper">
-                <div class="productos-carrito">
-                    <form action="carrito.php?lang=<?php echo htmlspecialchars($lang); ?>" method="post" id="form-carrito">
-                        <table class="tabla-carrito">
-                            <thead>
-                                <tr>
-                                    <th><?php echo htmlspecialchars($t['producto_col']); ?></th>
-                                    <th><?php echo htmlspecialchars($t['precio_col']); ?></th>
-                                    <th><?php echo htmlspecialchars($t['cantidad_col']); ?></th>
-                                    <th style="text-align: right;"><?php echo htmlspecialchars($t['total_col']); ?></th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($carrito as $item): ?>
-                                    <?php if (isset($productos[$item['id']])): ?>
-                                        <?php
-                                            $infoProducto = $productos[$item['id']];
-                                            $subtotal_producto = $infoProducto['precio'] * $item['cantidad'];
-                                        ?>
-                                        <tr class="fila-producto">
-                                            <td>
-                                                <div class="producto-info">
-                                                    <!-- Ruta de imagen de ejemplo. Debes sustituirla. -->
-                                                    <img src="store.storeimages.cdn-apple.com<?php echo urlencode($infoProducto['imagen']); ?>?wid=80&hei=80" alt="<?php echo htmlspecialchars($infoProducto['nombre']); ?>">
-                                                    <div class="producto-nombre"><?php echo htmlspecialchars($infoProducto['nombre']); ?></div>
-                                                </div>
-                                            </td>
-                                            <td class="producto-precio-unidad"><?php echo htmlspecialchars($moneda); ?><?php echo number_format($infoProducto['precio'], 2); ?></td>
-                                            <td>
-                                                <input type="number" name="cantidades[<?php echo htmlspecialchars($item['id']); ?>]" value="<?php echo htmlspecialchars($item['cantidad']); ?>" min="0">
-                                            </td>
-                                            <td class="producto-precio-total" style="text-align: right;"><?php echo htmlspecialchars($moneda); ?><?php echo number_format($subtotal_producto, 2); ?></td>
-                                            <td>
-                                                <button type="submit" name="eliminar" value="<?php echo htmlspecialchars($item['id']); ?>" class="btn-eliminar" title="Eliminar producto">×</button>
-                                            </td>
-                                        </tr>
-                                    <?php endif; ?>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <div class="botones-carrito">
-                            <button type="button" class="btn-continuar-compra" onclick="window.location.href='index.php?lang=<?php echo htmlspecialchars($lang); ?>'"><?php echo htmlspecialchars($t['continuar_compra']); ?></button>
-                            <button type="submit" name="actualizar_cantidades" class="btn-actualizar"><?php echo htmlspecialchars($t['actualizar_carrito']); ?></button>
-                        </div>
-                    </form>
+        <?php foreach ($items_detallados as $item): ?>
+            <div class="cart-item">
+                <div class="item-img">
+                    <img src="img/<?php echo $item['imagen']; ?>.jpg" alt="">
                 </div>
-
-                <div class="resumen-carrito">
-                    <h2><?php echo htmlspecialchars($t['resumen_pedido']); ?></h2>
-                    <div class="resumen-linea">
-                        <span><?php echo htmlspecialchars($t['subtotal']); ?>:</span>
-                        <span><?php echo htmlspecialchars($moneda); ?><?php echo number_format($subtotal, 2); ?></span>
-                    </div>
-                    <div class="resumen-linea">
-                        <span><?php echo htmlspecialchars($t['envio']); ?>:</span>
-                        <span><?php echo htmlspecialchars($moneda); ?><?php echo number_format($costoEnvio, 2); ?></span>
-                    </div>
-                     <div class="resumen-linea">
-                        <span><?php echo htmlspecialchars($t['impuestos']); ?> (21%):</span>
-                        <span><?php echo htmlspecialchars($moneda); ?><?php echo number_format($impuestos, 2); ?></span>
-                    </div>
-                    
-                    <div class="resumen-total">
-                        <span><?php echo htmlspecialchars($t['total_col']); ?>:</span>
-                        <span><?php echo htmlspecialchars($moneda); ?><?php echo number_format($totalFinal, 2); ?></span>
-                    </div>
-
-                    <form action="carrito.php?lang=<?php echo htmlspecialchars($lang); ?>" method="post" class="form-pago" style="margin-top: 30px;">
-                        <h3><?php echo htmlspecialchars($t['info_envio']); ?></h3>
-                        <input type="text" name="nombre" placeholder="<?php echo htmlspecialchars($t['nombre_completo']); ?>" required>
-                        <input type="email" name="email" placeholder="<?php echo htmlspecialchars($t['correo_electronico']); ?>" required>
-                        <textarea name="direccion" placeholder="<?php echo htmlspecialchars($t['direccion_completa']); ?>" rows="3" required></textarea>
-                        <select name="metodo_pago" required>
-                            <option value="">-- <?php echo htmlspecialchars($t['metodo_pago']); ?> --</option>
-                            <option value="tarjeta"><?php echo htmlspecialchars($t['tarjeta_credito']); ?></option>
-                            <option value="paypal"><?php echo htmlspecialchars($t['paypal']); ?></option>
-                        </select>
-                        <button type="submit" name="pagar"><?php echo htmlspecialchars($t['pago_ahora']); ?></button>
-                    </form>
+                <div class="item-info">
+                    <h2><?php echo htmlspecialchars($item['nombre']); ?></h2>
+                    <p>Color: <?php echo htmlspecialchars($item['color']); ?></p>
+                    <p>Cantidad: <?php echo $item['cantidad']; ?></p>
+                    <a href="carrito.php?eliminar=<?php echo $item['key']; ?>" class="btn-eliminar">Eliminar</a>
+                </div>
+                <div class="item-price">
+                    <?php echo formatear_precio($item['subtotal']); ?>
                 </div>
             </div>
-        <?php endif; ?>
-    </div>
+        <?php endforeach; ?>
+
+        <div class="summary-box">
+            <div class="coupon-section">
+                <?php if($porcentaje_descuento > 0): ?>
+                    <div class="coupon-active">
+                        <span>✅ Cupón del <?php echo $porcentaje_descuento; ?>% aplicado</span>
+                        <a href="carrito.php?quitar_cupon=1" style="color: var(--red); text-decoration:none; font-size: 12px;">Eliminar</a>
+                    </div>
+                <?php else: ?>
+                    <span style="font-size: 14px; font-weight: 600;">¿Tienes un código de descuento?</span>
+                    <form action="aplicar_cupon.php" method="POST" class="coupon-form">
+                        <input type="text" name="codigo_cupon" placeholder="Código" required>
+                        <button type="submit">Aplicar</button>
+                    </form>
+                    <?php if(isset($_GET['error']) && $_GET['error'] == 'cupon_invalido'): ?>
+                        <p style="color: var(--red); font-size: 12px; margin-top: 10px;">El código no es válido o ha expirado.</p>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span><?php echo formatear_precio($subtotal_carrito); ?></span>
+            </div>
+            
+            <?php if($porcentaje_descuento > 0): ?>
+            <div class="summary-row" style="color: #34c759;">
+                <span>Descuento (<?php echo $porcentaje_descuento; ?>%)</span>
+                <span>- <?php echo formatear_precio($monto_descuento); ?></span>
+            </div>
+            <?php endif; ?>
+
+            <div class="summary-row">
+                <span>Envío</span>
+                <span style="color: #34c759; font-weight: 600;">Gratis</span>
+            </div>
+            <div class="total-row summary-row">
+                <span>Total</span>
+                <span><?php echo formatear_precio($total_final); ?></span>
+            </div>
+            
+            <a href="finalizar_pedido.php" class="btn-checkout">Finalizar compra</a>
+            
+            <div style="text-align: center; margin-top: 25px;">
+                <a href="carrito.php?vaciar=1" class="btn-vaciar" onclick="return confirm('¿Vaciar toda la bolsa?')">Vaciar bolsa de compra</a>
+            </div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<footer style="padding: 80px 0; text-align: center; color: var(--gray); font-size: 13px;">
+    <div style="font-size: 22px; color: #000; margin-bottom: 15px;"></div>
+    <p>© 2026 Aura Stock. Pago seguro con encriptación SSL.</p>
+</footer>
 
 </body>
 </html>

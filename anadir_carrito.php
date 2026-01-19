@@ -1,47 +1,40 @@
 <?php
-session_start();
+require_once 'config.php';
 
-// Este script solo procesa la adición al carrito y redirige.
-// Asume que los datos de productos son consistentes o se cargan aquí si es necesario.
-
-$variante_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-$lang = filter_input(INPUT_GET, 'lang', FILTER_SANITIZE_STRING) ?? 'es';
-
-if (!$variante_id) {
-    // Si no hay ID válido, redirigir a la página principal
-    header("Location: index.php?lang=" . urlencode($lang));
-    exit;
-}
-
+// Asegurarnos de que el carrito exista en la sesión
 if (!isset($_SESSION['carrito'])) {
     $_SESSION['carrito'] = [];
 }
 
-$producto_anadido = false;
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+    $color = $_POST['color'] ?? 'Original';
+    // Validamos que la cantidad sea al menos 1
+    $cantidad = filter_input(INPUT_POST, 'cantidad', FILTER_VALIDATE_INT);
+    if ($cantidad < 1) { $cantidad = 1; }
 
-// Comprobar si el producto ya está en el carrito para aumentar la cantidad
-foreach ($_SESSION['carrito'] as $key => $item) {
-    if ($item['id'] == $variante_id) {
-        $_SESSION['carrito'][$key]['cantidad']++;
-        $producto_anadido = true;
-        break;
+    if ($id) {
+        // Identificador único: permite tener el mismo producto en diferentes colores
+        $key = $id . "_" . $color;
+        
+        if (isset($_SESSION['carrito'][$key])) {
+            // Si ya existe esta combinación, sumamos la nueva cantidad
+            $_SESSION['carrito'][$key]['cantidad'] += $cantidad;
+        } else {
+            // Si es nuevo, lo registramos
+            $_SESSION['carrito'][$key] = [
+                'id' => $id,
+                'color' => $color,
+                'cantidad' => $cantidad
+            ];
+        }
+        
+        // Redirigir con éxito
+        header("Location: detalle.php?id=$id&success=1");
+        exit;
     }
 }
 
-// Si no estaba, añadirlo como nuevo ítem
-if (!$producto_anadido) {
-    $_SESSION['carrito'][] = [
-        'id' => $variante_id,
-        'cantidad' => 1
-    ];
-}
-
-// Redirigir de vuelta a la página anterior o al index
-// Puedes usar $_SERVER['HTTP_REFERER'] si quieres que regrese exactamente a la página de detalle
-if (isset($_SERVER['HTTP_REFERER'])) {
-    header("Location: " . $_SERVER['HTTP_REFERER']);
-} else {
-    header("Location: index.php?lang=" . urlencode($lang));
-}
+// Si alguien intenta entrar a este archivo sin enviar el formulario, lo mandamos al inicio
+header("Location: index.php");
 exit;
-?>
